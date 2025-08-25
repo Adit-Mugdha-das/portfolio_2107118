@@ -1,11 +1,8 @@
 <?php
-require 'db.php';
+require __DIR__ . '/db.php';
 
-$ADMIN_KEY = 'changeme123';
-if (!isset($_GET['key']) || $_GET['key'] !== $ADMIN_KEY) {
-  http_response_code(403);
-  exit('Forbidden');
-}
+require __DIR__ . '/auth.php';
+require_login();   // must be logged in to edit
 
 $id = (int)($_GET['id'] ?? 0);
 $stmt = $conn->prepare("SELECT * FROM projects WHERE id=?");
@@ -27,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $download  = trim($_POST['download'] ?? '');
   $award     = trim($_POST['award'] ?? '');
 
-  // Keep existing images by default (can be single name or comma list)
+  // Keep existing images by default (CSV list)
   $currentImagesCSV = $proj['image'] ?? '';
   $newImagesCSV     = $currentImagesCSV;
 
@@ -66,7 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 
   if ($title !== '') {
-    // build UPDATE with all extended fields
     $sql = "UPDATE projects
                SET title=?, description=?, link=?, image=?,
                    duration=?, tech=?, github=?, readme=?, download=?, award=?
@@ -80,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     );
     $u->execute();
 
-    header('Location: admin_projects.php?key='.$ADMIN_KEY.'&msg=updated');
+    header('Location: admin_projects.php?msg=updated'); // <-- no key
     exit;
   } else {
     $notice = $notice ?: '⚠️ Title is required.';
@@ -129,7 +125,7 @@ if (!empty($proj['image'])) {
   <div class="wrap">
     <div class="top">
       <h2 style="margin:0;">Edit Project</h2>
-      <a href="<?='admin_projects.php?key='.$ADMIN_KEY?>">← Back to Admin</a>
+      <a href="admin_projects.php">← Back to Admin</a>
     </div>
 
     <?php if($notice): ?><div class="notice"><?=htmlspecialchars($notice)?></div><?php endif; ?>

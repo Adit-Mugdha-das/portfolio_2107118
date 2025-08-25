@@ -1,4 +1,7 @@
 <?php
+// Start session for navbar auth state
+if (session_status() === PHP_SESSION_NONE) session_start();
+
 // ===== Editable profile data =====
 $name     = "Adit Mugdha Das";
 $hello    = "Hello, I'm";
@@ -39,6 +42,13 @@ $links = [
       <a href="certifications.php">Certifications</a>
       <a href="awards.php">Honors & Awards</a>
       <a href="contact.php">Contact</a>
+
+      <?php if (!empty($_SESSION['admin_id'])): ?>
+        <a href="admin_projects.php">Admin Panel</a>
+        <a href="logout.php" style="color:#fbbf24">Logout</a>
+      <?php else: ?>
+        <a href="login.php" style="color:#fbbf24">Admin</a>
+      <?php endif; ?>
     </nav>
   </div>
 </header>
@@ -56,8 +66,7 @@ $links = [
 
     <div class="cta">
       <a class="btn primary" href="<?= htmlspecialchars($cvDownload) ?>" download>Download CV</a>
-<a class="btn ghost"   href="<?= htmlspecialchars($cvView) ?>" target="_blank" rel="noopener">View CV</a>
-
+      <a class="btn ghost"   href="<?= htmlspecialchars($cvView) ?>" target="_blank" rel="noopener">View CV</a>
     </div>
 
     <div class="socials">

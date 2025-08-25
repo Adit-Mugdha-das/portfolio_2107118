@@ -1,12 +1,9 @@
 <?php
 require 'db.php';
 
-/* ---------- Simple key guard ---------- */
-$ADMIN_KEY = 'changeme123';
-if (!isset($_GET['key']) || $_GET['key'] !== $ADMIN_KEY) {
-  http_response_code(403);
-  exit('Forbidden. Append ?key='.$ADMIN_KEY.' to the URL.');
-}
+/* ---------- Session auth guard ---------- */
+require __DIR__ . '/auth.php';   // starts session + helpers
+require_login();                 // redirects to login.php if not logged in
 
 $notice = '';
 
@@ -80,7 +77,7 @@ if (isset($_GET['delete'])) {
   $del = $conn->prepare("DELETE FROM projects WHERE id=?");
   $del->bind_param('i', $id);
   $del->execute();
-  header('Location: admin_projects.php?key='.$ADMIN_KEY.'&msg=deleted');
+  header('Location: admin_projects.php?msg=deleted'); // <-- no key
   exit;
 }
 
@@ -122,6 +119,7 @@ $rows = $conn->query("SELECT id, title, image, link FROM projects ORDER BY id DE
       <div class="admin-nav">
         <a href="homepage.php">Home</a>
         <a href="projects.php">Public Projects</a>
+        <a href="logout.php">Logout</a>
       </div>
     </div>
 
@@ -190,9 +188,9 @@ $rows = $conn->query("SELECT id, title, image, link FROM projects ORDER BY id DE
               <td><?= htmlspecialchars($r['title']) ?></td>
               <td><?php if(!empty($r['link'])): ?><a href="<?= htmlspecialchars($r['link'])?>" target="_blank" rel="noopener">Open</a><?php endif; ?></td>
               <td>
-                <a href="<?='admin_project_edit.php?id='.$r['id'].'&key='.$ADMIN_KEY?>">Edit</a>
+                <a href="<?='admin_project_edit.php?id='.$r['id']?>">Edit</a>
                 &nbsp;|&nbsp;
-                <a href="<?='admin_projects.php?key='.$ADMIN_KEY.'&delete='.$r['id']?>" onclick="return confirm('Delete this project?')">Delete</a>
+                <a href="<?='admin_projects.php?delete='.$r['id']?>" onclick="return confirm('Delete this project?')">Delete</a>
               </td>
             </tr>
           <?php endforeach; endif; ?>

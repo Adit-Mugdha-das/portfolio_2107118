@@ -1,4 +1,9 @@
-<?php include 'db.php'; ?>
+<?php
+include 'db.php';
+
+// make navbar aware of auth state
+if (session_status() === PHP_SESSION_NONE) session_start();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -86,6 +91,13 @@
       <a href="certifications.php">Certifications</a>
       <a href="awards.php">Honors & Awards</a>
       <a href="contact.php">Contact</a>
+
+      <?php if (!empty($_SESSION['admin_id'])): ?>
+        <a href="admin_projects.php">Admin Panel</a>
+        <a href="logout.php" style="color:#fbbf24">Logout</a>
+      <?php else: ?>
+        <a href="login.php" style="color:#fbbf24">Admin</a>
+      <?php endif; ?>
     </nav>
   </div>
 </header>
