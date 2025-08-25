@@ -4,8 +4,8 @@ $name     = "Adit Mugdha Das";
 $hello    = "Hello, I'm";
 $tagline  = "3rd-year CSE student @ KUET — AI • Machine Learning • Deep Learning";
 $bio      = "I'm a 3rd-year CSE student at KUET, driven by curiosity in AI, Machine Learning, and Deep Learning. I thrive on solving real-world problems and crafting unique, innovative tech with clean, elegant code.";
-$cvDownload = "#";  // e.g. "assets/Adit_Mugdha_CV.pdf"
-$cvView     = "#";  // e.g. Google Drive link
+$cvDownload = "assets/cv/Adit_Mugdha_Das_CV.pdf";  // local file for download
+$cvView     = "assets/cv/Adit_Mugdha_Das_CV.pdf";   // e.g. Google Drive link
 $links = [
   'linkedin' => 'https://www.linkedin.com/in/adit-mugdha-das-0a6723314/',
   'github'   => 'https://github.com/Adit-Mugdha-das',
@@ -55,8 +55,9 @@ $links = [
     <p class="bio"><?= htmlspecialchars($bio) ?></p>
 
     <div class="cta">
-      <a class="btn primary" href="<?= htmlspecialchars($cvDownload) ?>">Download CV</a>
-      <a class="btn ghost"   href="<?= htmlspecialchars($cvView) ?>" target="_blank" rel="noopener">View CV</a>
+      <a class="btn primary" href="<?= htmlspecialchars($cvDownload) ?>" download>Download CV</a>
+<a class="btn ghost"   href="<?= htmlspecialchars($cvView) ?>" target="_blank" rel="noopener">View CV</a>
+
     </div>
 
     <div class="socials">
