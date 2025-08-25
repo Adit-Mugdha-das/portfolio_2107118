@@ -190,3 +190,92 @@ nav a.active{ color:#fff; background:#0b1220; box-shadow:0 0 0 1px #0b1220, 0 0 
   .profile-image img{ height:auto }
   .about-title{ font-size: 1.9rem }
 }
+}
+
+
+/* ===== Education page ===== */
+
+.edu{ padding: 28px 0 36px }
+.edu-title{
+  text-align:center;
+  font-weight:800;
+  font-size: clamp(28px, 4vw, 44px);
+  margin: 0 0 24px;
+  color:#ff85c1;
+  text-shadow:0 0 12px rgba(192,132,252,.45);
+}
+
+.edu-card{
+  display:flex;
+  gap:20px;
+  align-items: center;
+  padding:20px;
+  margin: 0 auto 16px;
+  max-width: 920px;                /* nice readable width */
+  transition: transform .2s ease, box-shadow .25s ease;
+  border-radius: 18px;
+}
+.edu-card:hover{ transform: translateY(-2px); box-shadow:0 0 18px rgba(192,132,252,.25) }
+
+.edu-logo{
+  flex:0 0 96px;
+  display:flex; align-items:center; justify-content:center;
+  background: rgba(255,255,255,.04);
+  border:1px solid var(--line);
+  border-radius:14px;
+  width:96px; height:96px;
+  box-shadow: 0 6px 14px rgba(0,0,0,.25);
+}
+.edu-logo img{ width:76px; height:76px; object-fit:contain }
+
+.edu-body{ flex:1 }
+.edu-school{ margin:0 0 4px; font-size: clamp(18px, 2.2vw, 26px); color:#d8b4fe; font-weight:800 }
+.edu-degree{ margin:0 0 2px; color:#fff }
+.edu-meta{ margin:0 0 4px; color:#cbd5e1 }
+
+/* Highlight section (Grade + Award) */
+.edu-highlight{ margin:0; color:#c7d2fe }
+.edu-highlight .muted{ color: var(--muted) }
+
+/* Award badge now on its own line */
+.edu-highlight .badge{
+  display:block;            /* forces new line */
+  margin:6px 0 0;           /* space after grade */
+  padding:2px 8px; 
+  border-radius:999px;
+  background: rgba(168,85,247,.15); 
+  color:#e9d5ff; 
+  border:1px solid rgba(168,85,247,.35);
+}
+
+/* View Certificate link under badge */
+.edu-highlight .edu-link{
+  display:inline-block;
+  margin-top:4px;
+  margin-left:0;
+  color: var(--brand-strong); 
+  text-decoration: underline;
+}
+.edu-highlight .edu-link:hover{ color: var(--brand) }
+
+/* Responsive: stack on small screens */
+@media (max-width: 780px){
+  .edu-card{ flex-direction:column; align-items:flex-start; max-width: 100% }
+  .edu-logo{ width:84px; height:84px; flex-basis:auto }
+  .edu-logo img{ width:66px; height:66px }
+}
+
+/* Modal */
+.modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:50 }
+.modal.open{ display:flex }
+.modal-backdrop{ position:absolute; inset:0; background: rgba(0,0,0,.8); backdrop-filter: blur(2px) }
+.modal-content{
+  position:relative; z-index:1; max-width:min(92vw, 980px); max-height:90vh;
+  border:1px solid var(--line); border-radius:16px; overflow:hidden;
+  background: #0b1220; box-shadow:0 12px 40px rgba(0,0,0,.55);
+}
+.modal-content img{ display:block; max-width:100%; height:auto }
+.modal-close{
+  position:absolute; top:8px; right:10px; border:0; background:transparent; color:#fff;
+  font-size:28px; line-height:1; cursor:pointer;
+}
