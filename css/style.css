@@ -110,3 +110,83 @@ nav a.active{ color:#fff; background:#0b1220; box-shadow:0 0 0 1px #0b1220, 0 0 
 
 /* Footer */
 .site-footer{ border-top:1px solid var(--line); padding:18px 0; color:#9aa4b2; }
+
+
+
+/* ===== About page (no external libs) ===== */
+
+/* Outer wrapper similar to your previous layout */
+.about-wrapper{
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+  padding:24px;
+  margin:28px auto;
+}
+@media (min-width: 768px){
+  .about-wrapper{ flex-direction:row; align-items:stretch; }
+}
+
+/* Left: image panel */
+.profile-image{
+  flex:1.35;              /* was 1 */
+  min-height:500px;       /* was 380px */
+  border-radius:16px;
+  overflow:hidden;
+  border:3px solid var(--brand-strong);
+  box-shadow:0 0 15px rgba(168,85,247,.45);
+  transition: transform .35s ease, box-shadow .35s ease;
+}
+@media (min-width: 992px){
+  .profile-image{ min-width:420px; }
+.profile-image:hover{ transform:scale(1.02); box-shadow:0 0 20px rgba(192,132,252,.55) }
+.profile-image img{
+  width:100%; height:100%; object-fit:cover;
+  object-position: 40% center; /* like your previous page */
+  transition: transform .35s ease;
+}
+.profile-image:hover img{ transform: scale(1.02) }
+
+/* Right: text column */
+.about-text-content{
+  flex:1.65;
+  padding-left: 20px;
+}
+@media (max-width: 767px){
+  .about-text-content{ padding-left:0; text-align:left }
+}
+
+/* Heading with a soft neon glow */
+.about-title{
+  text-align:center;
+  color:#ff85c1;
+  font-size: clamp(28px, 4vw, 44px);
+  margin: 4px 0 16px;
+  text-shadow: 0 0 12px rgba(192,132,252,.55);
+  font-weight:800;
+}
+
+/* Body text */
+.about-text{
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--text);
+  text-align: justify;
+  margin: 0 0 14px;
+}
+@media (min-width: 640px){
+  .about-text{ font-size: 1.0625rem } /* slightly larger on sm+ */
+}
+
+/* Accent utilities */
+.highlight{ color:#ff85c1 }
+.cta-link{ color: var(--brand-strong); font-weight:700; text-decoration:none }
+.cta-link:hover{ color:#c084fc }
+
+/* Mobile adjustments to mimic your old behavior */
+@media (max-width: 767px){
+  .about-wrapper{ padding:12px; align-items:center }
+  .profile-image{ width:100%; min-height:auto; margin-bottom:10px }
+  .profile-image img{ height:auto }
+  .about-title{ font-size: 1.9rem }
+}
