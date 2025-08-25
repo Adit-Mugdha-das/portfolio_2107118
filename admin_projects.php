@@ -1,59 +1,82 @@
 <?php
 require 'db.php';
 
-// --- tiny guard (optional): add ?key=YOURKEY to the URL ---
+/* ---------- Simple key guard ---------- */
 $ADMIN_KEY = 'changeme123';
 if (!isset($_GET['key']) || $_GET['key'] !== $ADMIN_KEY) {
   http_response_code(403);
-  exit('Forbidden. Add ?key=changeme123 to the URL (and change the key in the file).');
+  exit('Forbidden. Append ?key='.$ADMIN_KEY.' to the URL.');
 }
 
-// handle create
 $notice = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $title = trim($_POST['title'] ?? '');
-  $desc  = trim($_POST['description'] ?? '');
-  $link  = trim($_POST['link'] ?? '');
-  $fname = null;
 
-  // handle file upload (optional)
-  if (!empty($_FILES['image']['name'])) {
-    $orig = $_FILES['image']['name'];
-    $ext  = strtolower(pathinfo($orig, PATHINFO_EXTENSION));
-    if (in_array($ext, ['jpg','jpeg','png','webp','gif'])) {
-      $fname = time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/','_', $orig);
-      $dest  = __DIR__ . '/assets/projects/' . $fname;
-      if (!move_uploaded_file($_FILES['image']['tmp_name'], $dest)) {
-        $notice = 'Image upload failed.';
-        $fname = null;
+/* ---------- CREATE: add new project ---------- */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'create') {
+  $title     = trim($_POST['title'] ?? '');
+  $desc      = trim($_POST['description'] ?? '');
+  $link      = trim($_POST['link'] ?? '');
+  $duration  = trim($_POST['duration'] ?? '');
+  $tech      = trim($_POST['tech'] ?? '');          // comma-separated chips
+  $github    = trim($_POST['github'] ?? '');
+  $readme    = trim($_POST['readme'] ?? '');
+  $download  = trim($_POST['download'] ?? '');
+  $award     = trim($_POST['award'] ?? '');
+
+  $filenames = [];
+
+  // Handle multiple images (optional)
+  if (!empty($_FILES['images']['name'][0])) {
+    foreach ($_FILES['images']['name'] as $i => $orig) {
+      if (!is_uploaded_file($_FILES['images']['tmp_name'][$i])) continue;
+      $ext = strtolower(pathinfo($orig, PATHINFO_EXTENSION));
+      if (!in_array($ext, ['jpg','jpeg','png','webp','gif'])) continue;
+
+      $safe  = preg_replace('/[^a-zA-Z0-9_\.-]/','_', $orig);
+      $fname = time().'_'.$i.'_'.$safe;
+      $dest  = __DIR__.'/assets/projects/'.$fname;
+      if (move_uploaded_file($_FILES['images']['tmp_name'][$i], $dest)) {
+        $filenames[] = $fname;
       }
-    } else {
-      $notice = 'Invalid image type.';
     }
   }
 
-  if ($title) {
-    $stmt = $conn->prepare("INSERT INTO projects (title, description, image, link) VALUES (?,?,?,?)");
-    $stmt->bind_param('ssss', $title, $desc, $fname, $link);
+  $allImages = implode(',', $filenames); // can be empty
+
+  if ($title !== '') {
+    $sql = "INSERT INTO projects
+              (title, description, image, link, duration, tech, github, readme, download, award)
+            VALUES (?,?,?,?,?,?,?,?,?,?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param(
+      'ssssssssss',
+      $title, $desc, $allImages, $link, $duration, $tech, $github, $readme, $download, $award
+    );
     $stmt->execute();
-    $notice = $notice ?: 'Project added.';
+    $notice = '✅ Project added.';
   } else {
-    $notice = $notice ?: 'Title is required.';
+    $notice = '⚠️ Title is required.';
   }
 }
 
-// handle delete via GET ?delete=id
+/* ---------- DELETE ---------- */
 if (isset($_GET['delete'])) {
   $id = (int)$_GET['delete'];
-  // fetch image to remove file
+
+  // remove image files if exist
   $imgStmt = $conn->prepare("SELECT image FROM projects WHERE id=?");
   $imgStmt->bind_param('i', $id);
   $imgStmt->execute();
-  $imgRes = $imgStmt->get_result()->fetch_assoc();
-  if ($imgRes && !empty($imgRes['image'])) {
-    $path = __DIR__ . '/assets/projects/' . $imgRes['image'];
-    if (is_file($path)) @unlink($path);
+  if ($row = $imgStmt->get_result()->fetch_assoc()) {
+    if (!empty($row['image'])) {
+      foreach (explode(',', $row['image']) as $img) {
+        $img = trim($img);
+        if (!$img) continue;
+        $path = __DIR__ . '/assets/projects/' . $img;
+        if (is_file($path)) @unlink($path);
+      }
+    }
   }
+
   $del = $conn->prepare("DELETE FROM projects WHERE id=?");
   $del->bind_param('i', $id);
   $del->execute();
@@ -61,7 +84,7 @@ if (isset($_GET['delete'])) {
   exit;
 }
 
-// fetch all
+/* ---------- LIST ---------- */
 $rows = $conn->query("SELECT id, title, image, link FROM projects ORDER BY id DESC")->fetch_all(MYSQLI_ASSOC);
 ?>
 <!DOCTYPE html>
@@ -69,46 +92,114 @@ $rows = $conn->query("SELECT id, title, image, link FROM projects ORDER BY id DE
 <head>
   <meta charset="UTF-8" />
   <title>Admin • Projects</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
   <style>
-    body { font-family: system-ui, Arial; margin: 24px; }
-    h1 { margin-bottom: 10px; }
-    form { display:grid; gap:10px; max-width:520px; margin-bottom: 28px; padding:16px; border:1px solid #e5e7eb; border-radius:12px; }
-    input, textarea { padding:10px; border:1px solid #cbd5e1; border-radius:8px; }
-    button { padding:10px 14px; border:0; border-radius:10px; background:#111827; color:#fff; cursor:pointer; }
-    .table { width:100%; border-collapse: collapse; }
-    .table th, .table td { border-bottom:1px solid #e5e7eb; padding:10px; text-align:left; }
-    .thumb { width:72px; height:48px; object-fit:cover; border-radius:8px; background:#f3f4f6; }
-    .notice { margin: 10px 0; color: #065f46; }
+    body.is-dark { background:#0b1020; color:#e5e7eb; }
+    .admin-wrap { max-width:1100px; margin:32px auto; padding:0 16px; }
+    .admin-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+    .admin-title { font-size:28px; font-weight:800; letter-spacing:.3px; }
+    .admin-nav a { color:#cbd5e1; margin-left:12px; text-decoration:none; }
+    .notice { margin:10px 0 18px; padding:10px 12px; border-radius:10px; background:#0f172a; border:1px solid #1f2937; }
+    .card { background:#0f152b; border:1px solid #1f2a46; border-radius:16px; box-shadow:0 8px 24px rgba(0,0,0,.25); }
+    .card-pad { padding:16px; }
+    .grid-2 { display:grid; grid-template-columns: 1fr 1.2fr; gap:16px; }
+    .form-grid { display:grid; gap:10px; }
+    .input, .textarea, .file, .btn { width:100%; }
+    .input, .textarea, .file { padding:12px; background:#0b1120; color:#e5e7eb; border:1px solid #1f2a46; border-radius:12px; }
+    .row-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .btn { padding:12px 14px; border:0; border-radius:12px; background:#0ea5e9; color:#081019; font-weight:700; cursor:pointer; }
+    .table { width:100%; border-collapse:collapse; }
+    .table th, .table td { border-bottom:1px solid #1e293b; padding:12px; }
+    .thumb { width:92px; height:60px; object-fit:cover; border-radius:10px; background:#0b1120; border:1px solid #1f2a46; margin-right:6px; }
+    .muted { color:#94a3b8; font-size:13px; }
+    @media (max-width: 900px){ .grid-2{ grid-template-columns:1fr } }
   </style>
 </head>
-<body>
-  <h1>Admin • Projects</h1>
-  <?php if(!empty($_GET['msg'])) echo "<div class='notice'>".htmlspecialchars($_GET['msg'])."</div>"; ?>
-  <?php if($notice) echo "<div class='notice'>".htmlspecialchars($notice)."</div>"; ?>
+<body class="is-dark">
+  <div class="admin-wrap">
+    <div class="admin-header">
+      <div class="admin-title">Admin • Projects</div>
+      <div class="admin-nav">
+        <a href="homepage.php">Home</a>
+        <a href="projects.php">Public Projects</a>
+      </div>
+    </div>
 
-  <form method="post" enctype="multipart/form-data">
-    <input type="text" name="title" placeholder="Project title" required />
-    <textarea name="description" rows="4" placeholder="Short description (optional)"></textarea>
-    <input type="url" name="link" placeholder="Project link (GitHub/demo) (optional)" />
-    <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp,.gif" />
-    <button type="submit">Add Project</button>
-  </form>
+    <?php if(!empty($_GET['msg']) || !empty($notice)): ?>
+      <div class="notice"><?= htmlspecialchars($_GET['msg'] ?? $notice) ?></div>
+    <?php endif; ?>
 
-  <table class="table">
-    <thead><tr><th>Thumb</th><th>Title</th><th>Link</th><th>Actions</th></tr></thead>
-    <tbody>
-      <?php foreach($rows as $r): ?>
-        <tr>
-          <td><?php if(!empty($r['image'])): ?>
-              <img class="thumb" src="<?='assets/projects/'.htmlspecialchars($r['image'])?>" alt="">
-              <?php endif; ?>
-          </td>
-          <td><?=htmlspecialchars($r['title'])?></td>
-          <td><?php if(!empty($r['link'])): ?><a href="<?=htmlspecialchars($r['link'])?>" target="_blank" rel="noopener">Open</a><?php endif; ?></td>
-          <td><a href="?key=<?=$ADMIN_KEY?>&delete=<?=$r['id']?>" onclick="return confirm('Delete this project?')">Delete</a></td>
-        </tr>
-      <?php endforeach; ?>
-    </tbody>
-  </table>
+    <div class="grid-2">
+      <!-- Create card -->
+      <div class="card card-pad">
+        <h3 style="margin:0 0 10px; font-size:18px;">Add Project</h3>
+        <form class="form-grid" method="post" enctype="multipart/form-data">
+          <input type="hidden" name="action" value="create">
+
+          <input class="input" type="text" name="title" placeholder="Project title" required />
+          <textarea class="textarea" name="description" rows="4" placeholder="Short description (optional)"></textarea>
+
+          <div class="row-2">
+            <input class="input" type="text" name="duration" placeholder="Duration (e.g., Jul–Dec 2024)" />
+            <input class="input" type="text" name="tech" placeholder="Tech chips (e.g., JavaFX, MySQL, CSS)" />
+          </div>
+
+          <div class="row-2">
+            <input class="input" type="url" name="github" placeholder="GitHub URL (optional)" />
+            <input class="input" type="url" name="readme" placeholder="Read More / README URL (optional)" />
+          </div>
+
+          <div class="row-2">
+            <input class="input" type="url" name="download" placeholder="Download URL (optional)" />
+            <input class="input" type="url" name="link" placeholder="Open / Demo URL (optional)" />
+          </div>
+
+          <input class="input" type="text" name="award" placeholder="Award text (e.g., Best Project Award In KUET)" />
+
+          <input class="file" type="file" name="images[]" accept=".jpg,.jpeg,.png,.webp,.gif" multiple />
+
+          <button class="btn" type="submit">Add Project</button>
+          <div class="muted">Images are stored in <code>assets/projects/</code></div>
+        </form>
+      </div>
+
+      <!-- List card -->
+      <div class="card card-pad">
+        <h3 style="margin:0 0 10px; font-size:18px;">All Projects</h3>
+        <table class="table">
+          <thead>
+            <tr><th>Thumb</th><th>Title</th><th>Link</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+          <?php if (!$rows): ?>
+            <tr><td colspan="4" class="muted">No projects yet.</td></tr>
+          <?php else: foreach($rows as $r): ?>
+            <tr>
+              <td>
+                <?php
+                  $first = '';
+                  if (!empty($r['image'])) {
+                    $imgs = explode(',', $r['image']);
+                    $first = trim($imgs[0] ?? '');
+                  }
+                  if ($first) {
+                    echo "<img class='thumb' src='assets/projects/".htmlspecialchars($first, ENT_QUOTES)."' alt=''>";
+                  }
+                ?>
+              </td>
+              <td><?= htmlspecialchars($r['title']) ?></td>
+              <td><?php if(!empty($r['link'])): ?><a href="<?= htmlspecialchars($r['link'])?>" target="_blank" rel="noopener">Open</a><?php endif; ?></td>
+              <td>
+                <a href="<?='admin_project_edit.php?id='.$r['id'].'&key='.$ADMIN_KEY?>">Edit</a>
+                &nbsp;|&nbsp;
+                <a href="<?='admin_projects.php?key='.$ADMIN_KEY.'&delete='.$r['id']?>" onclick="return confirm('Delete this project?')">Delete</a>
+              </td>
+            </tr>
+          <?php endforeach; endif; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
