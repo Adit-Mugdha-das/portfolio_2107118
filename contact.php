@@ -1,4 +1,6 @@
 <?php
+require __DIR__ . '/db.php';   // <-- make sure $conn is available
+
 // Simple form handler
 $notice = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -7,8 +9,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $message = trim($_POST['message'] ?? '');
 
   if ($name && filter_var($email, FILTER_VALIDATE_EMAIL) && $message) {
-    // 👉 Save to DB or send email here
-    $notice = "✅ Thanks! Your message has been sent.";
+    // Save to DB
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    $stmt = $conn->prepare("INSERT INTO messages (name, email, message, ip_addr) VALUES (?,?,?,?)");
+    if ($stmt) {
+      $stmt->bind_param('ssss', $name, $email, $message, $ip);
+      $stmt->execute();
+      $stmt->close();
+      $notice = "✅ Thanks! Your message has been sent.";
+    } else {
+      // If the table doesn't exist yet or another DB error occurs:
+      $notice = "⚠️ Could not save your message (database error).";
+    }
+
+    // (Optional) Email notification:
+    // @mail('mailbox.mugdha@gmail.com', 'New message from portfolio', "From: $name <$email>\n\n$message");
+
   } else {
     $notice = "⚠️ Please fill out all fields correctly.";
   }
@@ -51,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       font-size:22px;
       font-weight:700;
       margin-bottom:12px;
-      text-align:left; /* left aligned */
+      text-align:left;
     }
 
     .contact-left p {
@@ -60,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       display:flex;
       align-items:center;
       gap:10px;
-      padding-left:5px;  /* shift right */
+      padding-left:5px;
     }
     .contact-left i {
       color:#c084fc;
@@ -81,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       font-weight:600;
       text-decoration:none;
       padding:12px 20px;
-      text-align:left; /* button aligned left */
+      text-align:left;
     }
     .btn:hover {background:#a855f7;}
 
@@ -137,9 +153,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
 
       <div style="text-align:left;">
-  <a href="assets/cv/Adit_Mugdha_Das_CV.pdf" download class="btn">Download CV</a>
-</div>
-
+        <a href="assets/cv/Adit_Mugdha_Das_CV.pdf" download class="btn">Download CV</a>
+      </div>
     </div>
 
     <!-- Right -->

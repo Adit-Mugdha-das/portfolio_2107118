@@ -23,7 +23,7 @@ $name = "Adit Mugdha Das";
       <a href="skills.php" class="active">Skills</a>
       <a href="projects.php">Projects</a>
       <a href="certifications.php">Certifications</a>
-      <a href="awards.php">Honors & Awards</a>
+      <a href="achievements.php">Honors & Awards</a>
       <a href="contact.php">Contact</a>
     </nav>
   </div>

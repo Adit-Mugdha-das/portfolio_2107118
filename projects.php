@@ -89,7 +89,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
       <a href="skills.php">Skills</a>
       <a href="projects.php" class="active">Projects</a>
       <a href="certifications.php">Certifications</a>
-      <a href="awards.php">Honors & Awards</a>
+      <a href="achievements.php">Honors & Awards</a>
       <a href="contact.php">Contact</a>
 
       <?php if (!empty($_SESSION['admin_id'])): ?>
