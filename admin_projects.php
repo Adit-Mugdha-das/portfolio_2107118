@@ -120,6 +120,7 @@ $rows = $conn->query("SELECT id, title, image, link FROM projects ORDER BY id DE
         <a href="homepage.php">Home</a>
         <a href="projects.php">Public Projects</a>
         <a href="admin_certificates.php">Certificates Admin</a>
+        <a href="admin_achievements.php">Achvmts Admin</a>
         <a href="logout.php">Logout</a>
       </div>
     </div>

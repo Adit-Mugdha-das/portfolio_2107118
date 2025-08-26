@@ -111,6 +111,9 @@ $rows = $conn->query("SELECT id, title, issuer, issued_at, image FROM certificat
         <a href="homepage.php">Home</a>
         <a href="certifications.php">Public Certifications</a>
         <a href="admin_projects.php">Projects Admin</a>
+        <a href="admin_achievements.php">Achvmts Admin</a>
+        <a href="logout.php">Logout</a>
+      </div>
       </div>
     </div>
 
