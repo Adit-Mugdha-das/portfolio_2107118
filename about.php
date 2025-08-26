@@ -30,7 +30,7 @@ $intro4 = "Beyond academics, I’m passionate about sports (cricket, chess, foot
       <a href="skills.php">Skills</a>
       <a href="projects.php">Projects</a>
       <a href="certifications.php">Certifications</a>
-      <a href="awards.php">Honors & Awards</a>
+      <a href="achievements.php">Honors & Awards</a>
       <a href="contact.php">Contact</a>
     </nav>
   </div>

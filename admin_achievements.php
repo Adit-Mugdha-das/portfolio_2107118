@@ -102,6 +102,8 @@ $rows = $conn->query("SELECT id, title, org, issued, image FROM achievements ORD
         <a href="achievements.php">Public Achievements</a>
         <a href="admin_projects.php">Projects Admin</a>
         <a href="admin_certificates.php">Certs Admin</a>
+        <a href="admin_messages.php">Messages Admin</a>
+
         <a href="logout.php">Logout</a>
       </div>
     </div>
