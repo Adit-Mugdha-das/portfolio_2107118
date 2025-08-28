@@ -60,8 +60,6 @@ $links = [
 
     <h2 class="eyebrow"><?= htmlspecialchars($hello) ?></h2>
     <h1 class="headline"><?= htmlspecialchars($name) ?></h1>
-
-    <p class="tagline"><?= htmlspecialchars($tagline) ?></p>
     <p class="bio"><?= htmlspecialchars($bio) ?></p>
 
     <div class="cta">
