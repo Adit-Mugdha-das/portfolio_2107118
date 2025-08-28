@@ -1,6 +1,11 @@
 <?php
 require __DIR__ . '/db.php';   // <-- make sure $conn is available
 
+// Start session for navbar auth state (needed for Admin link logic)
+if (session_status() === PHP_SESSION_NONE) {
+  session_start();
+}
+
 // Simple form handler
 $notice = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -47,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     nav ul {list-style:none; display:flex; gap:18px; margin:0; padding:0;}
     nav ul li a {color:#fff; text-decoration:none; transition:.3s;}
     nav ul li a:hover {color:#c084fc; text-shadow:0 0 8px #c084fc;}
+    nav ul li a.active {color:#c084fc;}
     nav .hamburger {display:none; font-size:24px; color:#c084fc; background:none; border:none;}
 
     @media(max-width:768px){
@@ -116,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!-- Navbar -->
 <nav>
   <div class="brand">Adit Mugdha Das</div>
-  <button class="hamburger" id="hamburger"><i class="fas fa-bars"></i></button>
+  <button class="hamburger" id="hamburger" aria-label="Open menu"><i class="fas fa-bars"></i></button>
   <ul id="navLinks">
     <li><a href="homepage.php">Home</a></li>
     <li><a href="about.php">About</a></li>
@@ -126,6 +132,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <li><a href="certifications.php">Certifications</a></li>
     <li><a href="achievements.php">Honors & Awards</a></li>
     <li><a href="contact.php" class="active">Contact</a></li>
+
+    <?php if (!empty($_SESSION['admin_id'])): ?>
+      <li><a href="admin_projects.php">Admin Panel</a></li>
+      <li><a href="logout.php" style="color:#fbbf24">Logout</a></li>
+    <?php else: ?>
+      <li><a href="login.php" style="color:#fbbf24">Admin</a></li>
+    <?php endif; ?>
   </ul>
 </nav>
 
@@ -146,10 +159,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <p><i class="fas fa-envelope"></i> mailbox.mugdha@gmail.com</p>
 
       <div class="socials">
-        <a href="https://www.linkedin.com/in/adit-mugdha-das-0a6723314/" target="_blank"><i class="fab fa-linkedin"></i></a>
-        <a href="https://github.com/Adit-Mugdha-das" target="_blank"><i class="fab fa-github"></i></a>
-        <a href="https://wa.me/8801718108344" target="_blank"><i class="fab fa-whatsapp"></i></a>
-        <a href="https://www.facebook.com/aditmugdha.das.3" target="_blank"><i class="fab fa-facebook"></i></a>
+        <a href="https://www.linkedin.com/in/adit-mugdha-das-0a6723314/" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin"></i></a>
+        <a href="https://github.com/Adit-Mugdha-das" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i></a>
+        <a href="https://wa.me/8801718108344" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://www.facebook.com/aditmugdha.das.3" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook"></i></a>
       </div>
 
       <div style="text-align:left;">
