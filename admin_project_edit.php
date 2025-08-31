@@ -96,6 +96,8 @@ if (!empty($proj['image'])) {
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <title>Edit Project</title>
   <link rel="stylesheet" href="assets/css/style.css" />
   <style>

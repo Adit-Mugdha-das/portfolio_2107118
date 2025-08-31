@@ -79,6 +79,8 @@ $rows = $conn->query("SELECT id, title, issuer, issued_at, image FROM certificat
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <title>Admin • Certifications</title>
   <link rel="stylesheet" href="assets/css/style.css" />
   <style>

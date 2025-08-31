@@ -12,6 +12,8 @@ $intro4 = "Beyond academics, I’m passionate about sports (cricket, chess, foot
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <title><?= htmlspecialchars($name) ?> — About</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="css/style.css" rel="stylesheet">

@@ -22,6 +22,8 @@ $links = [
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <title><?= htmlspecialchars($name) ?> — Portfolio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="css/style.css" rel="stylesheet">
