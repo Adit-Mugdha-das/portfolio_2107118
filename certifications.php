@@ -7,9 +7,8 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <title>Certifications - Mugdha</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <link rel="stylesheet" href="assets/css/style.css" />
   <style>
     :root{
@@ -29,8 +28,8 @@ if (session_status() === PHP_SESSION_NONE) session_start();
     .hamburger{display:none; background:transparent; border:0; color:#fff; font-size:22px}
     @media (max-width:900px){
       .hamburger{display:block}
-      nav{position:absolute; right:20px; top:64px; display:none; flex-direction:column; background:#0b1220; border:1px solid var(--line); border-radius:14px; padding:10px}
-      nav.open{display:flex}
+      nav#nav{position:absolute; right:20px; top:64px; display:none; flex-direction:column; background:#0b1220; border:1px solid var(--line); border-radius:14px; padding:10px}
+      nav#nav.open{display:flex}
     }
 
     .wrap{max-width:1120px; margin:0 auto; padding:28px 16px}
@@ -47,19 +46,18 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 
     .chips{display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 12px}
     .chip{background:rgba(192,132,252,.12); color:#e9d5ff; border:1px solid rgba(168,85,247,.35); padding:5px 10px; font-weight:700; font-size:12.5px; border-radius:999px}
-
     .actions{display:flex; gap:14px; flex-wrap:wrap; margin-top:8px}
     .link{color:#c084fc; text-decoration:underline; font-weight:700}
     .link:hover{color:#fff}
   </style>
 </head>
-<body>
+<body class="is-dark">
 
 <header class="site-header">
   <div class="nav">
     <div class="brand">Adit Mugdha Das</div>
-    <button class="hamburger" onclick="document.querySelector('nav').classList.toggle('open')">☰</button>
-    <nav>
+    <button class="hamburger" id="hamburger">☰</button>
+    <nav id="nav">
       <a href="homepage.php">Home</a>
       <a href="about.php">About</a>
       <a href="education.php">Education</a>
@@ -92,7 +90,8 @@ if (session_status() === PHP_SESSION_NONE) session_start();
             ? 'assets/projects/' . htmlspecialchars($row['image'], ENT_QUOTES, 'UTF-8')
             : 'assets/edu/myproject.png';
 
-          echo '<article class="card">';
+          // card with reveal effect
+          echo '<article class="card reveal">';
           echo '  <img class="cover" src="'.$cover.'" alt="'.htmlspecialchars($row['title']).'">';
           echo '  <h2>'.htmlspecialchars($row['title']).'</h2>';
 
@@ -101,9 +100,13 @@ if (session_status() === PHP_SESSION_NONE) session_start();
           }
 
           $metaBits = [];
-          if (!empty($row['issued_at']))     $metaBits[] = 'Issued '.$row['issued_at'];
-          if (!empty($row['credential_id'])) $metaBits[] = 'Credential ID: '.htmlspecialchars($row['credential_id']);
-          if (!empty($metaBits)) echo '<div class="meta">'.implode(' &nbsp;•&nbsp; ', array_map('htmlspecialchars',$metaBits)).'</div>';
+          if (!empty($row['issued_at']))     $metaBits[] = 'Issued ' . $row['issued_at'];
+          if (!empty($row['credential_id'])) $metaBits[] = 'Credential ID: ' . $row['credential_id'];
+          if (!empty($metaBits)) {
+            // escape each bit safely
+            $safeBits = array_map(fn($m) => htmlspecialchars($m, ENT_QUOTES, 'UTF-8'), $metaBits);
+            echo '<div class="meta">'.implode(' &nbsp;•&nbsp; ', $safeBits).'</div>';
+          }
 
           if (!empty($row['description'])) {
             echo '  <p class="desc">'.nl2br(htmlspecialchars($row['description'])).'</p>';
@@ -130,5 +133,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
   </section>
 </main>
 
+<!-- Core JS (hamburger, scroll-to-top, typing, reveal) -->
+<script src="assets/js/app.js"></script>
 </body>
 </html>

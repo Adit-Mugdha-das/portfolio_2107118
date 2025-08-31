@@ -463,3 +463,40 @@ nav a.active{ color:#fff; background:#0b1220; box-shadow:0 0 0 1px #0b1220, 0 0 
   border-radius:12px; background:#0f172a; border:1px solid #1f2937; text-align:center
 }
 .mini{ color:#94a3b8; font-size:13px; margin-top:10px }
+
+
+/* ==========================
+   Scroll-to-Top Button
+   ========================== */
+#topBtn{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  padding:10px 14px;
+  border:none;
+  border-radius:50%;
+  background:#a855f7;
+  color:white;
+  font-size:20px;
+  display:none;
+  cursor:pointer;
+  box-shadow:0 4px 12px rgba(0,0,0,.4);
+  transition: background .2s ease;
+}
+#topBtn:hover{ background:#9333ea }
+
+/* ==========================
+   Reveal on Scroll Animation
+   ========================== */
+/* Reveal on Scroll with 1s delay */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 1s ease, transform 1s ease;
+  transition-delay: 0s; /* default, will be set dynamically */
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}

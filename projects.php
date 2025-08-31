@@ -11,7 +11,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <title>Projects - Mugdha</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <link rel="stylesheet" href="assets/css/style.css" />
   <style>
     :root{
@@ -32,9 +32,9 @@ if (session_status() === PHP_SESSION_NONE) session_start();
     .hamburger{display:none; background:transparent; border:0; color:#fff; font-size:22px}
     @media (max-width:900px){
       .hamburger{display:block}
-      nav{position:absolute; right:20px; top:64px; display:none; flex-direction:column;
+      nav#nav{position:absolute; right:20px; top:64px; display:none; flex-direction:column;
         background:#0b1220; border:1px solid var(--line); border-radius:14px; padding:10px}
-      nav.open{display:flex}
+      nav#nav.open{display:flex}
     }
 
     /* Page wrapper */
@@ -78,13 +78,13 @@ if (session_status() === PHP_SESSION_NONE) session_start();
       box-shadow:0 0 0 4px var(--brand-2)}
   </style>
 </head>
-<body>
+<body class="is-dark">
 
 <header class="site-header">
   <div class="nav">
     <div class="brand">Adit Mugdha Das</div>
-    <button class="hamburger" onclick="document.querySelector('nav').classList.toggle('open')">☰</button>
-    <nav>
+    <button class="hamburger" id="hamburger">☰</button>
+    <nav id="nav">
       <a href="homepage.php">Home</a>
       <a href="about.php">About</a>
       <a href="education.php">Education</a>
@@ -117,17 +117,21 @@ if (session_status() === PHP_SESSION_NONE) session_start();
       } else {
         while ($row = $res->fetch_assoc()) {
 
-          // IMAGES (single or comma-separated)
+          // IMAGES (support both 'images' CSV or legacy 'image')
           $images = [];
-          if (!empty($row['image'])) {
-            foreach (explode(',', $row['image']) as $piece) {
+          $imagesCsv = '';
+          if (isset($row['images'])) $imagesCsv = $row['images'];
+          elseif (isset($row['image'])) $imagesCsv = $row['image'];
+
+          if (!empty($imagesCsv)) {
+            foreach (explode(',', $imagesCsv) as $piece) {
               $piece = trim($piece);
-              if ($piece) $images[] = 'assets/projects/' . htmlspecialchars($piece, ENT_QUOTES, 'UTF-8');
+              if ($piece !== '') $images[] = 'assets/projects/' . htmlspecialchars($piece, ENT_QUOTES, 'UTF-8');
             }
           }
           $cover = count($images) ? $images[0] : 'assets/edu/myproject.png';
 
-          // OPTIONAL FIELDS (show only if present in table & not empty)
+          // OPTIONAL FIELDS (show only if present & not empty)
           $duration = isset($row['duration']) ? trim($row['duration']) : '';
           $tech     = isset($row['tech']) ? trim($row['tech']) : ''; // comma-separated
           $github   = isset($row['github']) ? trim($row['github']) : '';
@@ -136,10 +140,13 @@ if (session_status() === PHP_SESSION_NONE) session_start();
           $award    = isset($row['award']) ? trim($row['award']) : '';
           $open     = isset($row['link']) ? trim($row['link']) : '';
 
-          echo '<article class="card">';
+          // =====================
+          // PROJECT CARD with reveal effect
+          // =====================
+          echo '<article class="card reveal">';
 
           // Cover
-          echo '  <img class="cover" src="'.$cover.'" alt="'.htmlspecialchars($row['title']).'" onclick="openModal(this.src)">';
+          echo '  <img class="cover" src="'.$cover.'" alt="'.htmlspecialchars($row['title']).'" onclick="openModal(this.src)">' ;
 
           // Title
           echo '  <h2>'.htmlspecialchars($row['title']).'</h2>';
@@ -201,7 +208,11 @@ if (session_status() === PHP_SESSION_NONE) session_start();
   <img id="modalImg" src="" alt="">
 </div>
 
+<!-- Core JS (hamburger, scroll-to-top, typing, reveal) -->
+<script src="assets/js/app.js"></script>
+
 <script>
+  // Simple image modal controls
   function openModal(src){
     document.getElementById('modalImg').src = src;
     document.getElementById('imgModal').classList.add('open');
