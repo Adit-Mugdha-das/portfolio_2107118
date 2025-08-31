@@ -5,10 +5,18 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 $error = '';
 $redirect = $_GET['redirect'] ?? 'admin_projects.php';
 
+// === Handle "Forget saved username" action early (before any output) ===
+if (!empty($_POST['forget_user'])) {
+  setcookie('remember_user', '', time() - 3600, '/', '', isset($_SERVER['HTTPS']), true);
+  // After clearing, reload the page so the form no longer shows the saved user
+  header('Location: login.php');
+  exit;
+}
+
 // Prefill username from cookie
 $savedUser = $_COOKIE['remember_user'] ?? '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($_POST['forget_user'])) {
   $username = trim($_POST['username'] ?? '');
   $password = $_POST['password'] ?? '';
   $remember = !empty($_POST['remember']); // checkbox
@@ -22,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($res && password_verify($password, $res['password_hash'])) {
       $_SESSION['admin_id'] = (int)$res['id'];
 
-      // --- handle cookie ---
+      // --- handle cookie (1 day) ---
       if ($remember) {
         setcookie(
           'remember_user',
@@ -34,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           true // httponly
         );
       } else {
+        // If unchecked, remove any existing cookie
         setcookie('remember_user', '', time() - 3600, '/', '', isset($_SERVER['HTTPS']), true);
       }
 
@@ -59,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .card{background:#0f152b;border:1px solid #1f2a46;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.25);padding:18px}
     .input{width:100%;padding:12px;background:#0b1120;color:#e5e7eb;border:1px solid #1f2a46;border-radius:12px;margin-bottom:10px}
     .btn{width:100%;padding:12px 14px;border:0;border-radius:12px;background:#0ea5e9;color:#081019;font-weight:700;cursor:pointer}
+    .btn-danger{background:#7f1d1d;color:#fff}
     .error{margin-bottom:12px;padding:10px;border-radius:10px;background:#3b1a1a;border:1px solid #7f1d1d;color:#fecaca}
     a{color:#93c5fd;text-decoration:none}
     label{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:14px;color:#cbd5e1}
@@ -67,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="is-dark">
   <div class="wrap">
     <h2 style="margin:0 0 12px">Admin Login</h2>
-    <?php if($error): ?><div class="error"><?=htmlspecialchars($error)?></div><?php endif; ?>
+    <?php if($error): ?><div class="error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
     <div class="card">
       <form method="post">
         <input class="input" type="text" name="username" placeholder="Username"
@@ -76,6 +86,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label><input type="checkbox" name="remember" <?= $savedUser ? 'checked' : '' ?>> Remember me</label>
         <button class="btn" type="submit">Sign in</button>
       </form>
+
+      <?php if (!empty($_COOKIE['remember_user'])): ?>
+        <form method="post" style="margin-top:8px;">
+          <input type="hidden" name="forget_user" value="1">
+          <button type="submit" class="btn btn-danger">Forget saved username</button>
+        </form>
+      <?php endif; ?>
+
       <div style="margin-top:10px"><a href="homepage.php">&larr; Back to site</a></div>
     </div>
   </div>
