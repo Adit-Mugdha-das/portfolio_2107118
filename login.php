@@ -5,9 +5,13 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 $error = '';
 $redirect = $_GET['redirect'] ?? 'admin_projects.php';
 
+// Prefill username from cookie
+$savedUser = $_COOKIE['remember_user'] ?? '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $username = trim($_POST['username'] ?? '');
   $password = $_POST['password'] ?? '';
+  $remember = !empty($_POST['remember']); // checkbox
 
   if ($username && $password) {
     $stmt = $conn->prepare('SELECT id, password_hash FROM admins WHERE username=?');
@@ -17,6 +21,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($res && password_verify($password, $res['password_hash'])) {
       $_SESSION['admin_id'] = (int)$res['id'];
+
+      // --- handle cookie ---
+      if ($remember) {
+        setcookie(
+          'remember_user',
+          $username,
+          time() + 86400, // 1 day
+          '/',
+          '',
+          isset($_SERVER['HTTPS']), // secure if HTTPS
+          true // httponly
+        );
+      } else {
+        setcookie('remember_user', '', time() - 3600, '/', '', isset($_SERVER['HTTPS']), true);
+      }
+
       header('Location: ' . $redirect);
       exit;
     } else {
@@ -41,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .btn{width:100%;padding:12px 14px;border:0;border-radius:12px;background:#0ea5e9;color:#081019;font-weight:700;cursor:pointer}
     .error{margin-bottom:12px;padding:10px;border-radius:10px;background:#3b1a1a;border:1px solid #7f1d1d;color:#fecaca}
     a{color:#93c5fd;text-decoration:none}
+    label{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:14px;color:#cbd5e1}
   </style>
 </head>
 <body class="is-dark">
@@ -49,8 +70,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if($error): ?><div class="error"><?=htmlspecialchars($error)?></div><?php endif; ?>
     <div class="card">
       <form method="post">
-        <input class="input" type="text" name="username" placeholder="Username" required>
+        <input class="input" type="text" name="username" placeholder="Username"
+               value="<?= htmlspecialchars($savedUser) ?>" required>
         <input class="input" type="password" name="password" placeholder="Password" required>
+        <label><input type="checkbox" name="remember" <?= $savedUser ? 'checked' : '' ?>> Remember me</label>
         <button class="btn" type="submit">Sign in</button>
       </form>
       <div style="margin-top:10px"><a href="homepage.php">&larr; Back to site</a></div>
