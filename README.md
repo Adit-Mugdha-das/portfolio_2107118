@@ -72,5 +72,8 @@ Handled by `style.css` using media queries and `clamp()`:
 - Contact form collapses to single column at **max-width:900px**.  
 - Requires viewport meta tag:  
 
-```html
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+## Summary:  
+HTML structures pages, CSS provides design + responsiveness, JavaScript adds interactivity 
+(navbar, scroll-to-top, typing, reveal-on-scroll with delay). Database CRUD is implemented in 
+admin pages and contact form. Sessions secure the admin panel, cookies store username. 
+Responsiveness achieved with media queries and viewport meta tag.
